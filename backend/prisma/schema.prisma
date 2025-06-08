@@ -1,0 +1,49 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id             String   @id @default(uuid())
+  nickname       String
+  role           Role
+  presentation   Presentation @relation(fields: [presentationId], references: [id])
+  presentationId String
+
+  @@unique([nickname, presentationId]) 
+}
+
+model Presentation {
+  id        String   @id @default(cuid())
+  title     String
+  createdAt DateTime @default(now())
+  slides    Slide[]
+  users     User[]
+}
+
+model Slide {
+  id             String        @id @default(cuid())
+  index          Int
+  presentation   Presentation  @relation(fields: [presentationId], references: [id])
+  presentationId String
+  blocks         Block[]
+}
+
+model Block {
+  id       String   @id @default(cuid())
+  text     String
+  x        Float
+  y        Float
+  slide    Slide    @relation(fields: [slideId], references: [id])
+  slideId  String
+}
+
+enum Role {
+  VIEWER
+  EDITOR
+  CREATOR
+}
